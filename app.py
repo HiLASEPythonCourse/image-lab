@@ -23,19 +23,28 @@ def st_imshow(image):
     st.write(fig)
 
 
-# Ex: add boolean overlay parameter + checkbox
-# Ex: add centroids (optional) + checkbox
-def plot_labeled_image(image, label_image, regions):
-    fig, ax = plt.subplots(figsize=(10, 6))
-    # to make the background transparent, pass the value of `bg_label`,
-    # and leave `bg_color` as `None` and `kind` as `overlay`
-    image_label_overlay = label2rgb(label_image, image=image, bg_label=0)
+def plot_labeled_image(image, label_image, regions, plot_overlay=True, min_region_area=100):
+    """Plot image and the detected object labels
 
-    ax.imshow(image_label_overlay)
+    Arguments:
+        image: original image as numpy ndarray
+        label_image: label image data array
+        regions: detected regions (bounding boxes)
+        plot_overlay: colorize detected labels areas
+        min_region_area: minimum region area to show
+    """
+    fig, ax = plt.subplots(figsize=(10, 6))
+    if plot_overlay:
+        # to make the background transparent, pass the value of `bg_label`,
+        # and leave `bg_color` as `None` and `kind` as `overlay`
+        image_label_overlay = label2rgb(label_image, image=image, bg_label=0)
+        ax.imshow(image_label_overlay)
+    else:
+        ax.imshow(image)
 
     for region in regions:
         # take regions with large enough areas
-        if region.area >= 100:
+        if region.area >= min_region_area:
             # draw rectangle around segmented coins
             minr, minc, maxr, maxc = region.bbox
             rect = mpatches.Rectangle(
@@ -49,6 +58,8 @@ def plot_labeled_image(image, label_image, regions):
 
 
 def main():
+    """The main Streamlit application
+    """
     st.sidebar.subheader("Select example or upload file")
     example = st.sidebar.selectbox("Example", EXAMPLES)
     input_file = st.sidebar.file_uploader("Image file")
@@ -92,6 +103,8 @@ def main():
 
     st.subheader("Detected regions")
     st.write(f"Found {len(regions)} regions.")
+    # EXERCISE 1: add a checkbox input for controlling the plot_overlay parameter of plot_labeled_image
+    # EXERCISE 2: add a slider or number_input to control the min_region_area parameter
     fig = plot_labeled_image(image, label_image, regions)
     st.write(fig)
 
